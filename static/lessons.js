@@ -313,6 +313,7 @@ async function run(platform) {
     // Check their results
     variables['input'] = ''
     variables['output'] = ''
+    keyBind(variables['codeAreas'][platform]['output'], platform)
     focusMouse(platform)
     await checkResults(results['run'], code)
 }
