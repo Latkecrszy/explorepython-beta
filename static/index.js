@@ -60,3 +60,10 @@ async function runHome() {
     const results = await execute(editors['input'].getValue())
     editors['output'].setValue(editors['output'].getValue()+'\n'+results['run']['output']+'>>> ')
 }
+
+if (window.matchMedia("(max-width: 390px)").matches) {
+    document.getElementsByClassName("first_message")[0].children[0].innerText = "What is Explore Python?"
+}
+else {
+    document.getElementsByClassName("first_message")[0].children[0].innerText = "What is ExplorePython?"
+}

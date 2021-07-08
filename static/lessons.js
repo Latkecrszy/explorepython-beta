@@ -21,14 +21,23 @@ let variables = {
     last_lesson: localStorage.getItem('last_lesson'),
     lesson_info: null,
     hints: null,
-    hint: 0
+    hint: 0,
+    input: '',
+    output: ''
 }
 const lessons_to_nums = {"intro": 0, "variables": 1, "strings": 2, "builtins": 3, "ints_and_floats": 4,
-    "math": 5, "booleans": 6, "if_statements": 7, "while_loops": 8, "lists": 9, "for_loops": 10, "functions": 11, "final": 12}
+    "math": 5, "booleans": 6, "if_statements": 7, "while_loops": 8, "lists": 9, "for_loops": 10, "functions": 11,
+    //"strings_part_two": 12,
+    "final": 13}
 const nums_to_lessons = {0: 'intro', 1: 'variables', 2: 'strings', 3: 'builtins', 4: 'ints_and_floats',
-    5: 'math', 6: 'booleans', 7: 'if_statements', 8: 'while_loops', 9: 'lists', 10: 'for_loops', 11: "functions", 12: "final"}
+    5: 'math', 6: 'booleans', 7: 'if_statements', 8: 'while_loops', 9: 'lists', 10: 'for_loops', 11: "functions",
+    //12: "strings_part_two",
+    13: "final"}
 const responses = ["Great job!", "Good work!", "Great work!", "Good work!", "Nicely done!", "Nice job!", "Nice work!", "Well done!"]
 
+// TODO: Instead of checking for input beforehand, check for the EOF error input raises in the compiler.
+// TODO: Using the line it gives, check if that line contains input. If it does, then ask the user for the input.
+// TODO: Repeat until it runs without errors raised by input
 
 // Create the desktop version of the website
 const createDesktop = async () => {
@@ -68,7 +77,7 @@ const createDesktop = async () => {
     const buttonContainer = document.createElement("div")
     buttonContainer.classList.add("button_container")
     const runButton = document.createElement("button")
-    runButton.addEventListener("click", (e) => run(e))
+    runButton.addEventListener("click", () => run('desktop'))
     runButton.id = "run_desktop"
     runButton.classList.add("run")
     runButton.innerText = "Run ❯"
@@ -118,7 +127,7 @@ async function createMobile() {
     buttonContainer.classList.add("button_container")
     buttonContainer.id = "button_container_mobile"
     const runButton = document.createElement("button")
-    runButton.addEventListener("click", (e) => run(e))
+    runButton.addEventListener("click", () => run('mobile'))
     runButton.id = "run_mobile"
     runButton.classList.add("run")
     runButton.innerText = "Run ❯"
@@ -195,6 +204,9 @@ function hideLessons() {
 
 // Execute code and return the output
 async function execute(code) {
+    console.log(variables['input'])
+    console.log("StringIO('"+variables['input']+"')\n"+code)
+    code = "import sys\nfrom io import StringIO\nsys.stdin = StringIO('''"+variables['input']+"''')\n"+code
     const results = await fetch("https://emkc.org/api/v2/piston/execute", {
         method: 'POST',
         body: JSON.stringify({"language": "python", "version": "3.9.4", "files": [{"name": "main.py", "content": code}]})})
@@ -267,24 +279,40 @@ function switchTab(tab) {
 }
 
 // Listener for the run button
-async function run(event) {
+async function run(platform) {
     send_notif("loading", "Running code...")
-    let platform
-    // Define the platform
-    event.target.id === 'run_desktop' ? platform = 'desktop' : platform = 'mobile'
     // Grab the code from the codeArea
-    let code = variables['codeAreas'][platform]['input'].getValue()
-    // Handle input statements
-    if (code.includes("input(")) {
-        return input(platform)
-    }
+    const code = variables['codeAreas'][platform]['input'].getValue()
     // Run the code
     let results = await execute(code)
-    // Show their output
     let previousOutput = variables['codeAreas'][platform]['output'].getValue()
-    variables['codeAreas'][platform]['output'].setValue(previousOutput+'\n'+results['run']['stdout']+results['run']['stderr']+'\n>>> ')
+    console.log(previousOutput)
+    if (results['run']['stderr'].includes("EOFError: EOF when reading a line")) {
+        let output = results['run']['stdout']
+        output = output.replace(variables['output'], '')
+        console.log(output)
+        variables['codeAreas'][platform]['output'].setValue(previousOutput+'\n'+output)
+        console.log(variables['output'])
+        variables['output'] += output
+        console.log(variables['output'])
+        return await takeInput(output, platform)
+    }
+    /*TODO:
+    - Run the code
+    - When we reach an input statement, get user input
+    - Store that input in variables['input'] (an array) and give it to the program with the sys.stdin thing.
+    - Store previous stdout in variables['output'] (a string) and rerun the code
+    - When rerunning the code, delete the results['stdout'] from variables['output'] (using .replace(something, ''))
+    - Rinse and repeat
+     f*/
+    // Show their output
+    let output = results['run']['stdout']
+    output = output.replace(variables['output'], '')
+    variables['codeAreas'][platform]['output'].setValue(previousOutput+'\n'+output+results['run']['stderr']+'\n>>> ')
     //changeShell(platform, previousOutput+'\n'+results['run']['stdout']+results['run']['stderr']+'\n>>> ')
     // Check their results
+    variables['input'] = ''
+    variables['output'] = ''
     focusMouse(platform)
     await checkResults(results['run'], code)
 }
@@ -480,6 +508,13 @@ async function input(platform) {
     focusMouse(platform)
 }
 
+
+async function takeInput(question, platform) {
+    keyBindInput(variables['codeAreas'][platform]['output'], question, platform)
+    focusMouse(platform)
+
+}
+
 async function nextQuestion(question, platform) {
     let previousOutput = variables['codeAreas'][platform]['output'].getValue()
     if (variables['statements'].indexOf(question)+1 === variables['statements'].length) {
@@ -512,15 +547,18 @@ function keyBindInput(editor, question, platform) {
             let content = editor.getValue()
             content = content.split("\n")
             content = content[content.length-1]
+            question = question.split("\n")[question.split("\n").length-1]
+            // TODO: Figure out the bug here in detecting the question
             if (content.occurrences(question) === 1) {content = content.replaceAll(`${question}`, "")}
             else {
                 while (content.occurrences(question) > 1) {
                     content = content.replace(`${question}`, "")
                 }
             }
-            variables['input_responses'].push(content)
-            focusMouse(platform)
-            await nextQuestion(question, platform)
+            console.log(content)
+            variables['input'] += content+'\n'
+            console.log(content)
+            await run(platform)
         }
     })
 }

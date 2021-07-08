@@ -123,7 +123,6 @@ h1 {
 
 .first_message h1 {
     font-size: 45px;
-    word-wrap: break-word;
 }
 .first_message p {
     font-size: 24px;
@@ -182,6 +181,10 @@ h1 {
     .perk p {width: 80%; margin-left: 10%}
     .perk_row .perk:last-child {
         margin-bottom: 0
+    }
+    .first_message {
+        width: 80%;
+        margin: 0 0 100px 10%;
     }
 }
 
