@@ -6,8 +6,11 @@ ExplorePython provides the tools that every budding developer needs to succeed.
 After each lesson, you'll get the chance to test your knowledge by writing and running code relating to the topic you just learned. 
 You then have your solution evaluated on the spot before moving on.
 
-### Link to Website
+### Links to Website
 https://explorepython.dev
+https://explorepython.org
+
+
 ![Wesbite](static/images/website.png)
 
 ### Set up the project
