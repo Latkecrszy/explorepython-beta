@@ -7,8 +7,8 @@ After each lesson, you'll get the chance to test your knowledge by writing and r
 You then have your solution evaluated on the spot before moving on.
 
 ### Links to Website
-https://explorepython.dev
-https://explorepython.org
+- https://explorepython.dev
+- https://explorepython.org
 
 
 ![Wesbite](static/images/website.png)
