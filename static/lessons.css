@@ -65,14 +65,15 @@
 }
 
 .next_mobile {
-    position: absolute;
+    position: fixed;
     bottom: 8px;
     left: 118px;
     margin-left: 0;
 }
 
 #back_mobile {
-    left: 8px
+    left: 8px;
+    position: fixed !important;
 }
 
 #back_desktop {right: calc(52vw + 120px) !important}
@@ -363,6 +364,9 @@ html {overflow: hidden}
         animation: shrink_mobile 0.3s;
         animation-fill-mode: forwards;
         animation-timing-function: linear;
+    }
+    #code_page_mobile {
+        padding-bottom: 75px;
     }
 }
 
