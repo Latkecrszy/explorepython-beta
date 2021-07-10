@@ -13,6 +13,34 @@ You then have your solution evaluated on the spot before moving on.
 
 ![Wesbite](static/images/website.png)
 
+
+## Topics taught
+ExplorePython is still a work in progress, and many more lessons are on the way. 
+Here are some of the topics that are taught right now, followed by the ones coming soon:
+### Current topics
+- Variables
+- Strings
+- Builtins (`print`, `input`, `round`, and others)
+- Integers & Floats
+- Math
+- Booleans
+- Conditionals (If statements)
+- While and for loops
+- Lists
+- Functions
+
+
+### Topics coming soon:
+- Tuples
+- F-strings
+- String methods
+- List methods
+- Dictionaries
+- Dictionary methods & looping through dictionaries
+- Classes
+- Everything is an object
+- And more!
+
 ### Set up the project
 ExplorePython is run on a flask server. 
 To host locally, just clone the repository, install the requirements, and run `app.py`. 
