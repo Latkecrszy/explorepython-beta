@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <script>console.log(`first_last_lesson: ${localStorage.getItem("last_lesson")}`)</script>
-        <title>Lessons</title>
+        <title>Compiler</title>
         <link href="{{ url_for('static', filename='globals.css') }}" rel="stylesheet"/>
         <link href="{{ url_for('static', filename='lessons.css') }}" rel="stylesheet"/>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.61.1/codemirror.min.js"></script>
@@ -23,18 +23,10 @@
     </head>
     <script src="{{ url_for('static', filename='lessons.js') }}"></script>
     <script>
-        console.log('{{ lesson }}')
-        if ('{{ lesson }}' !== 'None' && localStorage.getItem('lesson') !== '{{ lesson }}') {
-            localStorage.setItem('lesson', '{{ lesson }}')
-            location.reload()
-
-        }
-        else {
-            if (!localStorage.getItem('lesson')) {localStorage.setItem('lesson', 'intro')}
-            if (!localStorage.getItem('last_lesson')) {localStorage.setItem('last_lesson', 'intro')}
-            console.log(`first_last_lesson: ${localStorage.getItem("last_lesson")}`)
-            console.log(localStorage.getItem("lesson"))
-        }
+        if (!localStorage.getItem('lesson')) {localStorage.setItem('lesson', 'intro')}
+        if (!localStorage.getItem('last_lesson')) {localStorage.setItem('last_lesson', 'intro')}
+        console.log(`first_last_lesson: ${localStorage.getItem("last_lesson")}`)
+        console.log(localStorage.getItem("lesson"))
         createDesktop()
     </script>
     <body>

@@ -4,12 +4,7 @@ You may remember that in math, a variable is a letter that stands for a number. 
 Variables are containers for pieces of information, whether that information is numbers, letters, or anything else.
 They are fundamental to Python and programming in general, which is why we're becoming familiar with them at the very beginning.
 Here's an example: If I wanted to make `x` equal to `10` in my program, I would write `x = 10`. 
-This tells Python that in this program, whenever I put `x`, it is equal to `10`.
-Keep in mind that the two sides of the `=` sign are very different: the name goes on the left, and the value on the right.
-Trying to create a variable with `10 = x` instead of `x = 10` will result in an error.
-It's also important to remember that variable names **cannot** contain anything other than letters or underscores. 
-If you include a number, comma, or any other character in a variable name you will get an error.
-
+This tells Python that in this program, whenever I put `x`, it is equal to `10`. 
 ## Why would I use variables?
 Variables aren't just limited to numbers. There are many data types in Python, 
 like strings (letters, numbers, and other characters), integers (whole numbers), floats (decimals), booleans (True or False values), lists (collections of other data types), and more. 
@@ -18,8 +13,7 @@ Variables are used to store data in a program. Instead of directly referencing `
 place it in a variable, like `x`, and use the variable instead. 
 
 ## You try!
-Now, it's your turn! In the box on the upper right, you'll see that one line is incomplete - we're starting to make a variable, 
-but it has no value! Fill in this value with a number of your choice, and then click `Run` to see if the resulting code is valid. 
-Then, you can click the `Next` button to move onto the next lesson.
-Note: Keep in mind that numbers in python cannot include commas. If you want to separate segments of a number, 
-you can use underscores (`_`s) instead.
+Now, it's your turn! In the box on the upper right, you'll see that one line is incomplete - we're starting to make a variable, but it has no value! 
+Fill in this value with a number of your choice, and then click `Run` to see if the resulting code is valid. 
+Then, you can click the `Next` button to move onto the next lesson. 
+Note: Keep in mind that numbers in python cannot include commas. If you want to separate segments of a number, you can use underscores (`_`s) instead.

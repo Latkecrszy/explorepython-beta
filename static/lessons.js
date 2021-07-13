@@ -23,18 +23,16 @@ let variables = {
     hints: null,
     hint: 0,
     input: '',
-    output: '',
-    shell_output: '',
-    shell_code: []
+    output: ''
 }
 const lessons_to_nums = {"intro": 0, "variables": 1, "strings": 2, "builtins": 3, "ints_and_floats": 4,
     "math": 5, "booleans": 6, "if_statements": 7, "while_loops": 8, "lists": 9, "for_loops": 10, "functions": 11,
-    //"tuples": 12, "f-strings": 13, "string_methods": 14, "list_methods": 15,
-    "final": 16}
+    //"strings_part_two": 12,
+    "final": 13}
 const nums_to_lessons = {0: 'intro', 1: 'variables', 2: 'strings', 3: 'builtins', 4: 'ints_and_floats',
     5: 'math', 6: 'booleans', 7: 'if_statements', 8: 'while_loops', 9: 'lists', 10: 'for_loops', 11: "functions",
-    //12: "tuples", 13: "f-strings", 14: "string_methods", 15: "list_methods",
-    16: "final"}
+    //12: "strings_part_two",
+    13: "final"}
 const responses = ["Great job!", "Good work!", "Great work!", "Good work!", "Nicely done!", "Nice job!", "Nice work!", "Well done!"]
 
 // TODO: Instead of checking for input beforehand, check for the EOF error input raises in the compiler.
@@ -174,7 +172,7 @@ function addLessonsContent() {
             // If they have, add a click listener that takes them to that lesson
             newLesson.addEventListener("click", () => {
                 localStorage.setItem('lesson', lessonName)
-                location.replace('/lessons')}
+                location.reload()}
             )
             newLesson.classList.add("available")
         }
@@ -299,10 +297,19 @@ async function run(platform) {
         console.log(variables['output'])
         return await takeInput(output, platform)
     }
+    /*TODO:
+    - Run the code
+    - When we reach an input statement, get user input
+    - Store that input in variables['input'] (an array) and give it to the program with the sys.stdin thing.
+    - Store previous stdout in variables['output'] (a string) and rerun the code
+    - When rerunning the code, delete the results['stdout'] from variables['output'] (using .replace(something, ''))
+    - Rinse and repeat
+     f*/
     // Show their output
     let output = results['run']['stdout']
     output = output.replace(variables['output'], '')
     variables['codeAreas'][platform]['output'].setValue(previousOutput+'\n'+output+results['run']['stderr']+'\n>>> ')
+    //changeShell(platform, previousOutput+'\n'+results['run']['stdout']+results['run']['stderr']+'\n>>> ')
     // Check their results
     variables['input'] = ''
     variables['output'] = ''
@@ -415,13 +422,7 @@ function keyBind(editor, platform) {
                 return variables['codeAreas'][platform]['output'].setValue(previousOutput+'\n'+variables['hints'][content.split('(')[1].split(')')[0]]+'\n>>> ')
             }
             let results = await execute(content)
-            console.log(content.occurrences("\n"))
-            if (!results['run']['stderr'].includes("SyntaxError: unexpected EOF while parsing")) {
-                variables['codeAreas'][platform]['output'].setValue(previousOutput+'\n'+results['run']['stdout']+results['run']['stderr']+'\n>>> ')
-            }
-            else {
-                variables['codeAreas'][platform]['output'].setValue(previousOutput+'\n    ')
-            }
+            variables['codeAreas'][platform]['output'].setValue(previousOutput+'\n'+results['run']['stdout']+results['run']['stderr']+'\n>>> ')
             focusMouse(platform)
         }
     })
@@ -473,7 +474,9 @@ function changeLesson(direction, platform) {
         }
         nextLesson = lessons_to_nums[variables['lesson']]-1
     }
-
+    if (nextLesson > lessons_to_nums[variables['last_lesson']]) {
+        localStorage.setItem("last_lesson", nums_to_lessons[nextLesson])
+    }
     let answers
     if (!localStorage.getItem('answers')) {
         answers = {}
@@ -483,26 +486,60 @@ function changeLesson(direction, platform) {
     }
     answers[variables['lesson']] = variables['codeAreas'][platform]['input'].getValue()
     localStorage.setItem('answers', JSON.stringify(answers))
-    console.log(location.href)
-    console.log(location.href.endsWith('/lessons'))
-    if (!location.href.endsWith('/lessons')) {
-        localStorage.setItem('last_lesson', 'intro')
-        localStorage.setItem('lesson', 'intro')
-        return location.replace('/lessons')
-    }
-
-    if (nextLesson > lessons_to_nums[variables['last_lesson']]) {
-        localStorage.setItem("last_lesson", nums_to_lessons[nextLesson])
-    }
     localStorage.setItem("lesson", nums_to_lessons[nextLesson])
-    location.replace('/lessons')
+    location.reload()
 }
 
+
+async function input(platform) {
+    let code = variables['codeAreas'][platform]['input'].getValue()
+    code = code.split("input")
+    for (const part of code) {
+        if (part.startsWith('(')) {
+            variables['original_statements'].push(part.split('(')[1].split(')')[0])
+            let results = await execute(`print(${part.split('(')[1].split(')')[0]})`)
+            variables['statements'].push(results['run']['stdout'].replace("\n", ""))
+        }
+    }
+    if (variables['statements'].length !== 0) {
+        let previousOutput = variables['codeAreas'][platform]['output'].getValue()
+        variables['codeAreas'][platform]['output'].setValue(previousOutput + '\n' + variables['statements'][0])
+        keyBindInput(variables['codeAreas'][platform]['output'], variables['statements'][0], platform)
+    }
+    focusMouse(platform)
+}
 
 
 async function takeInput(question, platform) {
     keyBindInput(variables['codeAreas'][platform]['output'], question, platform)
     focusMouse(platform)
+
+}
+
+async function nextQuestion(question, platform) {
+    let previousOutput = variables['codeAreas'][platform]['output'].getValue()
+    if (variables['statements'].indexOf(question)+1 === variables['statements'].length) {
+        let code = variables['codeAreas'][platform]['input'].getValue()
+        code = code.split("input")
+        for (let part of code) {
+            if (part.startsWith('(')) {
+                let originalPart = `${part}`
+                code[code.indexOf(originalPart)] = part.replace(`(${variables['original_statements'][variables['statements'].indexOf(question)]})`, `"${variables['input_responses'][variables['statements'].indexOf(question)]}"`)
+            }
+        }
+        code = code.join('')
+        let results = await execute(code)
+        variables['codeAreas'][platform]['output'].setValue(previousOutput + '\n' + results['run']['stdout'] + '\n>>> ')
+        variables['input_responses'] = []
+        variables['statements'] = []
+        variables['original_statements'] = []
+        keyBind(variables['codeAreas'][platform]['output'])
+        return await checkResults(results['run'], variables['codeAreas'][platform]['input'].getValue())
+    }
+    variables['codeAreas'][platform]['output'].setValue(previousOutput + '\n' + variables['statements'][variables['statements'].indexOf(question)+1])
+    keyBindInput(variables['codeAreas'][platform]['output'], variables['statements'][variables['statements'].indexOf(question)+1], platform)
+    focusMouse(platform)
+
 }
 
 function keyBindInput(editor, question, platform) {
