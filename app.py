@@ -20,7 +20,7 @@ def main():
 
 @app.route("/lessons")
 def lessons():
-    return render_template("lessons.html")
+    return render_template("lessons.html", lesson=request.args.get("lesson"))
 
 
 @app.route("/lesson", methods=["GET", "POST"])
