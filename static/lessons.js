@@ -211,7 +211,7 @@ async function execute(code) {
     code = "import sys\nfrom io import StringIO\nsys.stdin = StringIO('''"+variables['input']+"''')\n"+code
     const results = await fetch("https://emkc.org/api/v2/piston/execute", {
         method: 'POST',
-        body: JSON.stringify({"language": "python", "version": "3.9.4", "files": [{"name": "main.py", "content": code}]})})
+        body: JSON.stringify({"language": "python", "version": "3.10.0", "files": [{"name": "main.py", "content": code}]})})
     return await results.json()
 }
 
